@@ -62,7 +62,7 @@ def initialize_forcefield(
         bond.params[btype] = dict(k=bond_k, r0=bond_distance)
 
     all_combos = list(itertools.combinations(frame.particles.types, 2))
-    all_same_pairs = [(p, p) for p in frame.particles.types])
+    all_same_pairs = [(p, p) for p in frame.particles.types]
     # LJ pair interactions of inter-chain particles
     for pair in all_combos:
         lj.params[pair] = dict(epsilon=epsilon, sigma=sigma)
@@ -70,7 +70,7 @@ def initialize_forcefield(
     for pair in all_same_pairs:
         lj.params[pair] = dict(epsilon=0, sigma=0)
         lj.r_cut[pair] = 0
-return lj, bond
+    return lj, bond
 
 
 def initialize_sim(
@@ -99,7 +99,7 @@ def initialize_sim(
     gsd_writer = hoomd.write.GSD(
             filename=gsd_file_name,
             trigger=hoomd.trigger.Periodic(int(gsd_write_freq)),
-            mode="wb"
+            mode="wb",
             dynamic=["momentum"]
     )
     sim.operations.add(gsd_writer)
