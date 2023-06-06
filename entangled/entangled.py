@@ -31,6 +31,7 @@ def initialize_frame(gsd_file, frame_index, head_index=0, tail_index=-1):
         type2 = frame.particles.types[frame.particles.typeid[group[1]]]
         bond_type = "-".join([type1, type2])
         if bond_type != last_type:
+            last_type = bond_type
             bond_types.append(bond_type)
             id_count += 1
         bond_ids.append(id_count)
@@ -80,7 +81,9 @@ def initialize_sim(
         kT,
         tau_kT,
         dt,
+        log_file_name,
         gsd_file_name,
+        log_write_freq,
         gsd_write_freq
 ):
     """"""
@@ -95,12 +98,33 @@ def initialize_sim(
     integrator.methods.append(method)
     integrator.forces = list(forces)
     sim.operations.add(integrator)
-
+    
+    # Set up writers and loggers:
     gsd_writer = hoomd.write.GSD(
             filename=gsd_file_name,
             trigger=hoomd.trigger.Periodic(int(gsd_write_freq)),
             mode="wb",
             dynamic=["momentum"]
     )
+    logger = hoomd.logging.Logger(categories=["scalar", "string"])
+    thermo_props = hoomd.md.compute.ThermodynamicQuantities(
+            filter=hoomd.filter.All()
+    )
+    sim.operations.computes.append(thermo_props)
+    logger.add(sim, quantities=["timestep", "tps"])
+    logger.add(
+            thermo_props, quantities=["potential_energy", "kinetic_energy"]
+    )
+    for f in forces:
+        logger.add(f, quantities=["energy"])
+
+    table_file = hoomd.write.Table(
+            output=open(log_file_name, mode="w", newline="\n"),
+            trigger=hoomd.trigger.Periodic(period=int(log_write_freq)),
+            logger=logger,
+            max_header_len=None
+    )
+
     sim.operations.add(gsd_writer)
+    sim.operations.add(table_file)
     return sim
