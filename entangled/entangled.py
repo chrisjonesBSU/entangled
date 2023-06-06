@@ -113,8 +113,6 @@ def initialize_sim(
 
     for f in forces:
         logger.add(f, quantities=["energy"])
-
-    for f in forces:
         gsd_logger.add(f, quantities=["energy", "forces"])
 
     table_file = hoomd.write.Table(
@@ -123,7 +121,6 @@ def initialize_sim(
             logger=logger,
             max_header_len=None
     )
-
     gsd_writer = hoomd.write.GSD(
             filename=gsd_file_name,
             trigger=hoomd.trigger.Periodic(int(gsd_write_freq)),
