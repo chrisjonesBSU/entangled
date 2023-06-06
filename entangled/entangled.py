@@ -100,13 +100,8 @@ def initialize_sim(
     sim.operations.add(integrator)
     
     # Set up writers and loggers:
-    gsd_writer = hoomd.write.GSD(
-            filename=gsd_file_name,
-            trigger=hoomd.trigger.Periodic(int(gsd_write_freq)),
-            mode="wb",
-            dynamic=["momentum"]
-    )
     logger = hoomd.logging.Logger(categories=["scalar", "string"])
+    gsd_logger = hoomd.logging.Logger(categories=["scalar", "particle"])
     thermo_props = hoomd.md.compute.ThermodynamicQuantities(
             filter=hoomd.filter.All()
     )
@@ -115,14 +110,26 @@ def initialize_sim(
     logger.add(
             thermo_props, quantities=["potential_energy", "kinetic_energy"]
     )
+
     for f in forces:
         logger.add(f, quantities=["energy"])
+
+    for f in forces:
+        gsd_logger.add(f, quantities=["energy", "forces"])
 
     table_file = hoomd.write.Table(
             output=open(log_file_name, mode="w", newline="\n"),
             trigger=hoomd.trigger.Periodic(period=int(log_write_freq)),
             logger=logger,
             max_header_len=None
+    )
+
+    gsd_writer = hoomd.write.GSD(
+            filename=gsd_file_name,
+            trigger=hoomd.trigger.Periodic(int(gsd_write_freq)),
+            mode="wb",
+            dynamic=["momentum"],
+            logger=gsd_logger
     )
 
     sim.operations.add(gsd_writer)
