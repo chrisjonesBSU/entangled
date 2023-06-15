@@ -20,6 +20,7 @@ def initialize_frame(gsd_file, frame_index, head_index=0, tail_index=-1):
     for idx, indices in enumerate(cluster.cluster_keys):
         type_ids[indices] = idx
     frame.particles.typeid = type_ids
+    frame.particles.velocity = None # Zero out the particle velocities 
 
     bond_types = []
     bond_ids = []
