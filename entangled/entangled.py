@@ -98,7 +98,7 @@ def initialize_sim(
     integrator.methods.append(method)
     integrator.forces = list(forces)
     sim.operations.add(integrator)
-    
+
     # Set up writers and loggers:
     logger = hoomd.logging.Logger(categories=["scalar", "string"])
     gsd_logger = hoomd.logging.Logger(categories=["scalar", "particle"])
@@ -126,7 +126,7 @@ def initialize_sim(
             trigger=hoomd.trigger.Periodic(int(gsd_write_freq)),
             mode="wb",
             dynamic=["momentum"],
-            logger=gsd_logger
+            log=gsd_logger
     )
 
     sim.operations.add(gsd_writer)
