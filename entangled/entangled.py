@@ -50,24 +50,31 @@ def initialize_frame(gsd_file, frame_index, head_index=0, tail_index=-1):
 
 def initialize_forcefield(
         frame,
-        bond_distance=0.01,
+        bond_r0=0.01,
         bond_k=100,
-        epsilon=1,
-        sigma=1,
-        r_cut=2.5
+        bond_delta=0.0,
+        pair_epsilon=1,
+        pair_sigma=1,
+        pair_r_cut=2.5
 ):
     """"""
-    bond = hoomd.md.bond.Harmonic()
+    bond = hoomd.md.bond.FENEWCA()
     lj = hoomd.md.pair.LJ(default_r_cut=r_cut, nlist=hoomd.md.nlist.Cell(buffer=0.40))
 
     for btype in frame.bonds.types:
-        bond.params[btype] = dict(k=bond_k, r0=bond_distance)
+        bond.params[btype] = dict(
+                k=bond_k,
+                r0=bond_r0,
+                delta=delta,
+                epsilon=0,
+                sigma=0
+        )
 
     all_combos = list(itertools.combinations(frame.particles.types, 2))
     all_same_pairs = [(p, p) for p in frame.particles.types]
     # LJ pair interactions of inter-chain particles
     for pair in all_combos:
-        lj.params[pair] = dict(epsilon=epsilon, sigma=sigma)
+        lj.params[pair] = dict(epsilon=pair_epsilon, sigma=pair_sigma)
     # Same-chain particle pair interactions are turned off
     for pair in all_same_pairs:
         lj.params[pair] = dict(epsilon=0, sigma=0)
