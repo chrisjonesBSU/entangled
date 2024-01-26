@@ -22,25 +22,19 @@ def get_parameters():
     ''''''
     parameters = OrderedDict()
     # System and model params:
-    parameters["num_chains"] = [
-            200,
-            300,
-            400,
-            500
-    ]
-    parameters["chain_lengths"] = [
-            50,
-            100,
-            200,
-            300,
-            400,
-            500,
-            600,
-            700,
+    # MN is the combo of number of chains (M) and chain lengths (N)
+    parameters["MN"] = [
+            (500, 50),
+            (500, 100),
+            (250, 200),
+            (200, 350),
+            (500, 500),
+            (200, 700),
     ]
     parameters["number_density"] = [0.85]
     parameters["epsilon"] = [1.0]
     parameters["sigma"] = [1.0]
+    parameters["r_cut"] = [1.122462048309373]
     parameters["bond_k"] = [30]
     parameters["bond_max"] = [1.5] # units of sigma
     parameters["bond_delta"] = [40]
@@ -67,9 +61,10 @@ def main():
         statepoint = dict(zip(param_names, params))
         job = project.open_job(statepoint)
         job.init()
-        job.doc.setdefault("msd_sampled", False)
-        job.doc.setdefault("nvt_equilibrated", False)
-        job.doc.setdefault("nvt_runs", 0)
+        job.doc.setdefault("num_chains", job.sp.MN[0])
+        job.doc.setdefault("chain_lengths", job.sp.MN[1])
+        job.doc.setdefault("equilibrated", False)
+        job.doc.setdefault("runs", 0)
 
 
 if __name__ == "__main__":
