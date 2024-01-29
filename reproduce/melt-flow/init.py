@@ -24,12 +24,12 @@ def get_parameters():
     # System and model params:
     # MN is the combo of number of chains (M) and chain lengths (N)
     parameters["MN"] = [
-            (50, 50),
+            #(50, 50),
             #(500, 50),
             #(500, 100),
             #(250, 200),
             #(200, 350),
-            #(500, 500),
+            (500, 500),
             #(200, 700),
     ]
     parameters["number_density"] = [0.85] # 1/sigma^3
@@ -37,18 +37,18 @@ def get_parameters():
     parameters["sigma"] = [1.0]
     parameters["bond_k"] = [30]
     parameters["bond_max"] = [1.5] # units of sigma
-    parameters["bond_delta"] = [40]
+    parameters["bond_delta"] = [0]
     # Run time params:
-    parameters["dt"] = [0.012]
+    parameters["dt"] = [0.0012]
     parameters["friction_coeff"] = [4.2]
     parameters["kT"] = [4.2]
     parameters["n_steps"] = [1e8]
     parameters["shrink_kT"] = [6.0]
-    parameters["shrink_n_steps"] = [1e7]
-    parameters["shrink_period"] = [500]
+    parameters["shrink_n_steps"] = [1e6]
+    parameters["shrink_period"] = [1]
     parameters["tau_kT"] = [100]
-    parameters["gsd_write_freq"] = [5e5]
-    parameters["log_write_freq"] = [5e4]
+    parameters["gsd_write_freq"] = [1e5]
+    parameters["log_write_freq"] = [1e4]
     parameters["sim_seed"] = [42]
     return list(parameters.keys()), list(product(*parameters.values()))
 

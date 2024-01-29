@@ -86,12 +86,16 @@ def initial_run(job):
         chains = LJChain(
                 lengths=job.doc.chain_lengths,
                 num_mols=job.doc.num_chains,
+                bond_lengths={"A-A": 0.90}
         )
         density = job.sp.number_density * u.Unit("nm**-3")
         system = Pack(
                 molecules=chains,
                 density=density,
                 base_units=dict(),
+                edge=5.0,
+                overlap=5.0,
+                packing_expand_factor=8
         )
         forcefield = KremerGrestBeadSpring(
                 bond_k=job.sp.bond_k,
@@ -123,9 +127,12 @@ def initial_run(job):
         job.doc.tau_kT = job.sp.dt * job.sp.tau_kT
         # Set up stuff for shrinking volume step
         print("Running shrink step.")
+        sim.run_NVT(
+                n_steps=2e6, kT=job.sp.shrink_kT, tau_kt=job.doc.tau_kT
+        )
         target_box = get_target_box_number_density(
                 density=density,
-                n_beads = job.doc.N_particles
+                n_beads=job.doc.N_particles
         )
         shrink_kT_ramp = sim.temperature_ramp(
                 n_steps=job.sp.shrink_n_steps,
