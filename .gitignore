@@ -1,3 +1,14 @@
+# Signac stuff
+*workspace*
+*log-files*
+*.out*
+*.signac
+*.json
+.ipynb_checkpoints
+*.gsd*
+*.png*
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

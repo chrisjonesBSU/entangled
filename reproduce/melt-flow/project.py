@@ -74,6 +74,7 @@ def make_slab(job):
     """Run a bulk slab simulation; equilibrate in NVT"""
     from flowermd.base.system import Pack, Simulation
     from flowermd.library import LJChain, KremerGrestBeadSpring 
+    from flowermd.utils import get_target_box_number_density
 
     with job:
         print("------------------------------------")
@@ -120,13 +121,17 @@ def make_slab(job):
         job.doc.tau_kT = job.doc.dt * job.sp.tau_kT
         # Set up stuff for shrinking volume step
         print("Running shrink step.")
+        target_box = get_target_box_number_density(
+                density=job.sp.density,
+                n_beads = job.doc.N_particles 
+        )
         shrink_kT_ramp = sim.temperature_ramp(
                 n_steps=job.sp.shrink_n_steps,
                 kT_start=job.sp.shrink_kT,
                 kT_final=job.sp.kT
         )
         sim.run_update_volume(
-                final_density=job.sp.density,
+                final_box_lengths=target_box,
                 n_steps=job.sp.shrink_n_steps,
                 period=job.sp.shrink_period,
                 tau_kt=job.doc.tau_kT,
