@@ -31,19 +31,6 @@ class Borah(DefaultSlurmEnvironment):
         )
 
 
-class R2(DefaultSlurmEnvironment):
-    hostname_pattern = "r2"
-    template = "r2.sh"
-
-    @classmethod
-    def add_args(cls, parser):
-        parser.add_argument(
-            "--partition",
-            default="shortgpuq",
-            help="Specify the partition to submit to."
-        )
-
-
 class Fry(DefaultSlurmEnvironment):
     hostname_pattern = "fry"
     template = "fry.sh"
@@ -130,8 +117,7 @@ def make_slab(job):
         )
         sim.pickle_forcefield(job.fn("forcefield.pickle"))
         # Store more unit information in job doc
-        tau_kT = job.doc.dt * job.sp.tau_kT
-        job.doc.tau_kT = tau_kT
+        job.doc.tau_kT = job.doc.dt * job.sp.tau_kT
         # Set up stuff for shrinking volume step
         print("Running shrink step.")
         shrink_kT_ramp = sim.temperature_ramp(
@@ -151,32 +137,19 @@ def make_slab(job):
         sim.run_NVT(
                 n_steps=job.sp.n_steps, kT=job.sp.kT, tau_kt=job.doc.tau_kT
         )
-        print("Cooling down.")
-        # Cool down to final temp:
-        #TODO: Double check cool-down temp.
-        cooling_steps = 3e7
-        cool_ramp = sim.temperature_ramp(
-                n_steps=cooling_steps,
-                kT_start=job.sp.kT,
-                kT_final=2.4
-        )
-        sim.run_NVT(n_steps=cooling_steps, kT=cool_ramp, tau_kt=job.doc.tau_kT)
-        sim.run_NVT(n_steps=1e7, kT=2.4, tau_kt=job.doc.tau_kT)
         sim.save_restart_gsd(job.fn("restart.gsd"))
-        job.doc.nvt_runs = 1
+        job.doc.runs = 1
         print("Simulation finished.")
 
 
-@PPS_Weld.pre(initial_nvt_run_done)
-@PPS_Weld.post(nvt_equilibrated)
-@PPS_Weld.operation(
+@KG_PPA.pre(initial_run_done)
+@KG_PPA.post(equilibrated)
+@KG_PPA.operation(
         directives={"ngpu": 1, "executable": "python -u"},
-        name="run-nvt-longer"
+        name="run-longer"
 )
-def run_nvt_longer(job):
+def run_longer(job):
     import pickle
-    import unyt
-    from unyt import Unit
     import flowermd
     from flowermd.base.simulation import Simulation
     with job:
@@ -188,13 +161,12 @@ def run_nvt_longer(job):
         with open(job.fn("forcefield.pickle"), "rb") as f:
             ff = pickle.load(f)
 
-        gsd_path = job.fn(f"trajectory-nvt{job.doc.nvt_runs}.gsd")
-        log_path = job.fn(f"log-nvt{job.doc.nvt_runs}.txt")
-        ref_values = get_ref_values(job)
+        gsd_path = job.fn(f"trajectory{job.doc.nvt_runs + 1}.gsd")
+        log_path = job.fn(f"log{job.doc.nvt_runs + 1}.txt")
         sim = Simulation(
-                initial_state=job.fn("restart-nvt.gsd"),
+                initial_state=job.fn("restart.gsd"),
                 forcefield=ff,
-                reference_values=ref_values,
+                reference_values=dict(),
                 dt=job.sp.dt,
                 gsd_write_freq=job.sp.gsd_write_freq,
                 gsd_file_name=gsd_path,
@@ -203,8 +175,8 @@ def run_nvt_longer(job):
                 seed=job.sp.sim_seed,
         )
         sim.run_NVT(n_steps=1e7, kT=job.sp.kT, tau_kt=job.doc.tau_kT)
-        sim.save_restart_gsd(job.fn("restart-nvt.gsd"))
-        job.doc.nvt_runs += 1
+        sim.save_restart_gsd(job.fn("restart.gsd"))
+        job.doc.runs += 1
         print("Simulation finished.")
 
 if __name__ == "__main__":
