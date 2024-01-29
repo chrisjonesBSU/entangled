@@ -70,10 +70,11 @@ def get_ref_values(job):
 @KG_PPA.operation(
         directives={"ngpu": 1, "executable": "python -u"}, name="first-run"
 )
-def make_slab(job):
+def initial_run(job):
     """Run a bulk slab simulation; equilibrate in NVT"""
-    from flowermd.base.system import Pack, Simulation
-    from flowermd.library import LJChain, KremerGrestBeadSpring 
+    import unyt as u
+    from flowermd.base import Pack, Simulation
+    from flowermd.library import LJChain, KremerGrestBeadSpring
     from flowermd.utils import get_target_box_number_density
 
     with job:
@@ -86,9 +87,10 @@ def make_slab(job):
                 lengths=job.doc.chain_lengths,
                 num_mols=job.doc.num_chains,
         )
+        density = job.sp.number_density * u.Unit("nm**-3")
         system = Pack(
                 molecules=chains,
-                density=job.sp.number_density,
+                density=density,
                 base_units=dict(),
         )
         forcefield = KremerGrestBeadSpring(
@@ -122,8 +124,8 @@ def make_slab(job):
         # Set up stuff for shrinking volume step
         print("Running shrink step.")
         target_box = get_target_box_number_density(
-                density=job.sp.density,
-                n_beads = job.doc.N_particles 
+                density=density,
+                n_beads = job.doc.N_particles
         )
         shrink_kT_ramp = sim.temperature_ramp(
                 n_steps=job.sp.shrink_n_steps,
