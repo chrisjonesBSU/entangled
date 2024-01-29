@@ -24,12 +24,13 @@ def get_parameters():
     # System and model params:
     # MN is the combo of number of chains (M) and chain lengths (N)
     parameters["MN"] = [
-            (500, 50),
-            (500, 100),
-            (250, 200),
-            (200, 350),
-            (500, 500),
-            (200, 700),
+            (50, 50),
+            #(500, 50),
+            #(500, 100),
+            #(250, 200),
+            #(200, 350),
+            #(500, 500),
+            #(200, 700),
     ]
     parameters["number_density"] = [0.85] # 1/sigma^3
     parameters["epsilon"] = [1.0]

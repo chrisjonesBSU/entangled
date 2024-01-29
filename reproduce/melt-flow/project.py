@@ -180,4 +180,4 @@ def run_longer(job):
         print("Simulation finished.")
 
 if __name__ == "__main__":
-    PPS_Weld().main()
+    KG_PPA().main()
