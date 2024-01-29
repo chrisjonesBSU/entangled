@@ -120,7 +120,7 @@ def initial_run(job):
         )
         sim.pickle_forcefield(job.fn("forcefield.pickle"))
         # Store more unit information in job doc
-        job.doc.tau_kT = job.doc.dt * job.sp.tau_kT
+        job.doc.tau_kT = job.sp.dt * job.sp.tau_kT
         # Set up stuff for shrinking volume step
         print("Running shrink step.")
         target_box = get_target_box_number_density(
