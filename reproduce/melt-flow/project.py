@@ -29,6 +29,11 @@ class Borah(DefaultSlurmEnvironment):
             default="shortgpu",
             help="Specify the partition to submit to."
         )
+        parser.add_argument(
+            "--exclude",
+            default="gpu105",
+            help="Specify the type of nodes to exclude."
+        )
 
 
 class Fry(DefaultSlurmEnvironment):
@@ -175,8 +180,8 @@ def run_longer(job):
         with open(job.fn("forcefield.pickle"), "rb") as f:
             ff = pickle.load(f)
 
-        gsd_path = job.fn(f"trajectory{job.doc.nvt_runs + 1}.gsd")
-        log_path = job.fn(f"log{job.doc.nvt_runs + 1}.txt")
+        gsd_path = job.fn(f"trajectory{job.doc.runs + 1}.gsd")
+        log_path = job.fn(f"log{job.doc.runs + 1}.txt")
         sim = Simulation(
                 initial_state=job.fn("restart.gsd"),
                 forcefield=ff,
