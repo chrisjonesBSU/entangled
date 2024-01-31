@@ -59,6 +59,11 @@ def equilibrated(job):
     return job.doc.equilibrated
 
 
+@KG_PPA.label
+def system_ready(job):
+    return job.isfile("init.gsd")
+
+
 def get_ref_values(job):
     ref_length = job.doc.ref_length * Unit(job.doc.ref_length_unit)
     ref_mass = job.doc.ref_mass * Unit(job.doc.ref_mass_unit)
@@ -71,6 +76,42 @@ def get_ref_values(job):
     return ref_values_dict
 
 
+@KG_PPA.post(system_ready)
+@KG_PPA.operation(
+        directives={"ngpu": 0, "executable": "python -u"}, name="make-system"
+)
+def make_system(job):
+    """Run a bulk slab simulation; equilibrate in NVT"""
+    import unyt as u
+    from flowermd.base import Pack, Simulation
+    from flowermd.library import LJChain, KremerGrestBeadSpring
+    from flowermd.utils import get_target_box_number_density
+
+    with job:
+        print("------------------------------------")
+        print("JOB ID NUMBER:")
+        print(job.id)
+        print("------------------------------------")
+        # Create molecules and initial configuration
+        chains = LJChain(
+                lengths=job.doc.chain_lengths,
+                num_mols=job.doc.num_chains,
+                bond_lengths={"A-A": 0.90}
+        )
+        density = job.sp.number_density * u.Unit("nm**-3")
+        system = Pack(
+                molecules=chains,
+                density=density,
+                base_units=dict(),
+                edge=5.0,
+                overlap=5.0,
+                packing_expand_factor=8
+        )
+        system.to_gsd(file_name=job.fn("init.gsd"))
+        print("init.gsd has been saved...")
+
+
+@KG_PPA.pre(system_ready)
 @KG_PPA.post(initial_run_done)
 @KG_PPA.operation(
         directives={"ngpu": 1, "executable": "python -u"}, name="first-run"
