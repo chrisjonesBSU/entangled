@@ -83,9 +83,8 @@ def get_ref_values(job):
 def make_system(job):
     """Run a bulk slab simulation; equilibrate in NVT"""
     import unyt as u
-    from flowermd.base import Pack, Simulation
-    from flowermd.library import LJChain, KremerGrestBeadSpring
-    from flowermd.utils import get_target_box_number_density
+    from flowermd.base import Pack
+    from flowermd.library import LJChain
 
     with job:
         print("------------------------------------")
@@ -193,9 +192,12 @@ def initial_run(job):
                 kT=shrink_kT_ramp
         )
         print("Shrinking finished.")
-        print("Running NVT simulation.")
-        sim.run_NVT(
-                n_steps=job.sp.n_steps, kT=job.sp.kT, tau_kt=job.doc.tau_kT
+        print("Running Langevin simulation.")
+        sim.run_langevin(
+                n_steps=job.sp.n_steps,
+                kT=job.sp.kT,
+                default_gamma=job.sp.friction_coeff,
+                default_gamma_r=job.sp.friction_coeff,
         )
         sim.save_restart_gsd(job.fn("restart.gsd"))
         job.doc.runs = 1

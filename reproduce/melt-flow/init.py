@@ -28,9 +28,9 @@ def get_parameters():
             (500, 50),
             (500, 100),
             (250, 200),
-            (200, 350),
-            (500, 500),
-            (200, 700),
+            #(200, 350),
+            #(500, 500),
+            #(200, 700),
     ]
     parameters["number_density"] = [0.85] # 1/sigma^3
     parameters["epsilon"] = [1.0]
@@ -40,8 +40,8 @@ def get_parameters():
     parameters["bond_delta"] = [0]
     # Run time params:
     parameters["dt"] = [0.0012]
-    parameters["friction_coeff"] = [4.2]
-    parameters["kT"] = [4.2]
+    parameters["friction_coeff"] = [0.5]
+    parameters["kT"] = [1.0]
     parameters["n_steps"] = [1e8]
     parameters["shrink_kT"] = [6.0]
     parameters["shrink_n_steps"] = [1e6]
