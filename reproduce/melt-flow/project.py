@@ -105,7 +105,7 @@ def make_system(job):
                 base_units=dict(),
                 edge=5.0,
                 overlap=5.0,
-                packing_expand_factor=8
+                packing_expand_factor=15
         )
         system.to_gsd(file_name=job.fn("init.gsd"))
         print("init.gsd has been saved...")
