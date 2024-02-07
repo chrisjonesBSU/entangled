@@ -128,20 +128,7 @@ def initial_run(job):
         print(job.id)
         print("------------------------------------")
         # Create molecules and initial configuration
-        chains = LJChain(
-                lengths=job.doc.chain_lengths,
-                num_mols=job.doc.num_chains,
-                bond_lengths={"A-A": 0.90}
-        )
         density = job.sp.number_density * u.Unit("nm**-3")
-        system = Pack(
-                molecules=chains,
-                density=density,
-                base_units=dict(),
-                edge=5.0,
-                overlap=5.0,
-                packing_expand_factor=8
-        )
         forcefield = KremerGrestBeadSpring(
                 bond_k=job.sp.bond_k,
                 bond_max=job.sp.bond_max,
@@ -153,12 +140,10 @@ def initial_run(job):
 
         gsd_path = job.fn(f"trajectory{job.doc.runs + 1}.gsd")
         log_path = job.fn(f"log{job.doc.runs + 1}.txt")
-        init_snap = system.hoomd_snapshot
         hoomd_ff = forcefield.hoomd_forces
-        job.doc.N_particles = init_snap.particles.N
         # Set up initial simulation
         sim = Simulation(
-                initial_state=init_snap,
+                initial_state=job.fn("init.gsd"),
                 forcefield=hoomd_ff,
                 dt=job.sp.dt,
                 gsd_write_freq=job.sp.gsd_write_freq,
@@ -197,7 +182,11 @@ def initial_run(job):
                 n_steps=job.sp.n_steps,
                 kT=job.sp.kT,
                 default_gamma=job.sp.friction_coeff,
-                default_gamma_r=job.sp.friction_coeff,
+                default_gamma_r=(
+                    job.sp.friction_coeff,
+                    job.sp.friction_coeff,
+                    job.sp.friction_coeff,
+                )
         )
         sim.save_restart_gsd(job.fn("restart.gsd"))
         job.doc.runs = 1
