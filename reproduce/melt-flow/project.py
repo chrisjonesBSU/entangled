@@ -106,6 +106,7 @@ def make_system(job):
                 overlap=5.0,
                 packing_expand_factor=15
         )
+        job.doc.N_particles = system.n_particles
         system.to_gsd(file_name=job.fn("init.gsd"))
         print("init.gsd has been saved...")
 
@@ -231,4 +232,4 @@ def run_longer(job):
         print("Simulation finished.")
 
 if __name__ == "__main__":
-    KG_PPA().main()
+    KG_PPA(environment=Fry).main()
