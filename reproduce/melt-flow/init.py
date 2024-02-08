@@ -25,9 +25,9 @@ def get_parameters():
     # MN is the combo of number of chains (M) and chain lengths (N)
     parameters["MN"] = [
             (50, 50),
-            #(500, 50),
-            #(500, 100),
-            #(250, 200),
+            (500, 50),
+            (500, 100),
+            (250, 200),
             #(200, 350),
             #(500, 500),
             #(200, 700),
