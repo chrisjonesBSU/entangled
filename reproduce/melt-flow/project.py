@@ -83,7 +83,7 @@ def get_ref_values(job):
 def make_system(job):
     """Run a bulk slab simulation; equilibrate in NVT"""
     import unyt as u
-    from flowermd.base import Pack
+    from flowermd.base import Pack, Lattice
     from flowermd.library import LJChain
 
     with job:
@@ -98,13 +98,22 @@ def make_system(job):
                 bond_lengths={"A-A": 0.90}
         )
         density = job.sp.number_density * u.Unit("nm**-3")
-        system = Pack(
+        #system = Pack(
+        #        molecules=chains,
+        #        density=density,
+        #        base_units=dict(),
+        #        edge=5.0,
+        #        overlap=5.0,
+        #        packing_expand_factor=15
+        #)
+        n = int((job.sp.MN[0]/2)**(0.5))
+        job.doc.lattice_n = n
+        system = Lattice(
                 molecules=chains,
-                density=density,
                 base_units=dict(),
-                edge=5.0,
-                overlap=5.0,
-                packing_expand_factor=15
+                x=2,
+                y=2,
+                n=n,
         )
         job.doc.N_particles = system.n_particles
         system.to_gsd(file_name=job.fn("init.gsd"))
