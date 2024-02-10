@@ -111,9 +111,10 @@ def make_system(job):
         system = Lattice(
                 molecules=chains,
                 base_units=dict(),
-                x=2,
-                y=2,
+                x=4,
+                y=4,
                 n=n,
+                z_length_padding=4
         )
         job.doc.N_particles = system.n_particles
         system.to_gsd(file_name=job.fn("init.gsd"))
@@ -155,7 +156,7 @@ def initial_run(job):
         sim = Simulation(
                 initial_state=job.fn("init.gsd"),
                 forcefield=hoomd_ff,
-                dt=job.sp.dt,
+                dt=job.sp.dt / 100,
                 gsd_write_freq=job.sp.gsd_write_freq,
                 log_write_freq=job.sp.log_write_freq,
                 gsd_file_name=gsd_path,
@@ -168,7 +169,7 @@ def initial_run(job):
         # Set up stuff for shrinking volume step
         print("Running shrink step.")
         sim.run_NVT(
-                n_steps=2e6, kT=job.sp.shrink_kT, tau_kt=job.doc.tau_kT
+                n_steps=3e6, kT=job.sp.shrink_kT, tau_kt=job.doc.tau_kT
         )
         target_box = get_target_box_number_density(
                 density=density,
@@ -186,6 +187,7 @@ def initial_run(job):
                 tau_kt=job.doc.tau_kT,
                 kT=shrink_kT_ramp
         )
+        sim.dt = job.sp.dt
         print("Shrinking finished.")
         print("Running Langevin simulation.")
         sim.run_langevin(

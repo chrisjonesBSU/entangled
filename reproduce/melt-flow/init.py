@@ -43,7 +43,7 @@ def get_parameters():
     parameters["bond_max"] = [1.5] # units of sigma
     parameters["bond_delta"] = [0]
     # Run time params:
-    parameters["dt"] = [0.0012]
+    parameters["dt"] = [0.012]
     parameters["friction_coeff"] = [0.5]
     parameters["kT"] = [1.0]
     parameters["n_steps"] = [1e8]
