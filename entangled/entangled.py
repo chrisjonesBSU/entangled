@@ -8,7 +8,7 @@ import numpy as np
 
 def initialize_frame(gsd_file, frame_index, head_index=0, tail_index=-1):
     """"""
-    with gsd.hoomd.open(gsd_file, "rb") as traj:
+    with gsd.hoomd.open(gsd_file, "r") as traj:
         frame = traj[frame_index]
 
     cluster, cl_props = get_molecule_cluster(snap=frame)
@@ -20,7 +20,7 @@ def initialize_frame(gsd_file, frame_index, head_index=0, tail_index=-1):
     for idx, indices in enumerate(cluster.cluster_keys):
         type_ids[indices] = idx
     frame.particles.typeid = type_ids
-    frame.particles.velocity = None # Zero out the particle velocities 
+    frame.particles.velocity = None # Zero out the particle velocities
 
     bond_types = []
     bond_ids = []
@@ -59,7 +59,10 @@ def initialize_forcefield(
 ):
     """"""
     bond = hoomd.md.bond.FENEWCA()
-    lj = hoomd.md.pair.LJ(default_r_cut=r_cut, nlist=hoomd.md.nlist.Cell(buffer=0.40))
+    lj = hoomd.md.pair.LJ(
+            default_r_cut=pair_r_cut,
+            nlist=hoomd.md.nlist.Cell(buffer=0.40)
+    )
 
     for btype in frame.bonds.types:
         bond.params[btype] = dict(
@@ -103,7 +106,7 @@ def initialize_sim(
             hoomd.filter.All(), hoomd.filter.Tags(head_tail_indices)
     )
     method = hoomd.md.methods.NVT(kT=kT, tau=tau_kT, filter=integrate_group)
-    method = hoomd.md.methods.Langevin(filter=integrate_group, kT=kT, default_
+    #method = hoomd.md.methods.Langevin(filter=integrate_group, kT=kT, default_
     integrator.methods.append(method)
     integrator.forces = list(forces)
     sim.operations.add(integrator)

@@ -249,7 +249,7 @@ def run_longer(job):
 
 
 @KG_PPA.pre(equilibrated)
-@KG_PPA.post(first_ppa_run_done)
+@KG_PPA.post(initial_ppa_run_done)
 @KG_PPA.operation(
         directives={"ngpu": 1, "executable": "python -u"},
         name="run-ppa"
@@ -298,12 +298,14 @@ def run_ppa(job):
         sim.integrate_group = integrate_group
         sim.save_restart_gsd(job.fn("ppa_restart.gsd"))
         sim.pickle_forcefield(job.fn("ppa_forcefield.pickle"))
+        # Initial relaxation run with high friction coeff
         sim.run_langevin(
                 n_steps=1000,
                 kT=0.001,
                 default_gamma=20,
                 default_gamma_r=(20, 20, 20)
         )
+        # Longer run to reach equilibration
         sim.run_langevin(
                 n_steps=5e5,
                 kT=0.001,
