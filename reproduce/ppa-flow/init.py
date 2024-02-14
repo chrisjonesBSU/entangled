@@ -22,30 +22,16 @@ def get_parameters():
     ''''''
     parameters = OrderedDict()
     # System and model params:
-    # MN is the combo of number of chains (M) and chain lengths (N)
-    parameters["MN"] = [
-            (500, 50),
-            (500, 100),
-            (250, 200),
-            (200, 350),
-            (500, 500),
-            (200, 700),
-    ]
-    parameters["number_density"] = [0.85]
     parameters["epsilon"] = [1.0]
     parameters["sigma"] = [1.0]
     parameters["r_cut"] = [1.122462048309373]
-    parameters["bond_k"] = [30]
+    parameters["bond_k"] = [100]
     parameters["bond_max"] = [1.5] # units of sigma
     parameters["bond_delta"] = [40]
     # Run time params:
-    parameters["dt"] = [0.012]
-    parameters["friction_coeff"] = [4.2]
-    parameters["kT"] = [4.2]
+    parameters["dt"] = [0.006]
+    parameters["kT"] = [0.001]
     parameters["n_steps"] = [1e8]
-    parameters["shrink_kT"] = [6.0]
-    parameters["shrink_n_steps"] = [1e7]
-    parameters["shrink_period"] = [500]
     parameters["tau_kT"] = [100]
     parameters["gsd_write_freq"] = [5e5]
     parameters["log_write_freq"] = [5e4]
