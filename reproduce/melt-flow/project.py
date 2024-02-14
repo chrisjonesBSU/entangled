@@ -256,6 +256,7 @@ def run_longer(job):
 )
 def run_ppa(job):
     import pickle
+    import hoomd
     import flowermd
     from flowermd.base.simulation import Simulation
     import gsd.hoomd
@@ -273,6 +274,7 @@ def run_ppa(job):
                 frame=ppa_snap,
                 bond_r0=1.2,
                 bond_k=100,
+                bond_delta=job.sp.bond_delta,
                 pair_epsilon=job.sp.epsilon,
                 pair_sigma=job.sp.sigma,
                 pair_r_cut=1.12
@@ -285,9 +287,9 @@ def run_ppa(job):
                 forcefield=[ppa_lj, ppa_bond],
                 reference_values=dict(),
                 dt=job.sp.dt / 2, # Start with smaller dt
-                gsd_write_freq=job.sp.gsd_write_freq,
+                gsd_write_freq=500,
                 gsd_file_name=gsd_path,
-                log_write_freq=job.sp.log_write_freq,
+                log_write_freq=500,
                 log_file_name=log_path,
                 seed=job.sp.sim_seed,
         )
