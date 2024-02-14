@@ -55,7 +55,7 @@ def initialize_forcefield(
         bond_delta=0.0,
         pair_epsilon=1,
         pair_sigma=1,
-        pair_r_cut=2.5
+        pair_r_cut=1.12
 ):
     """"""
     bond = hoomd.md.bond.FENEWCA()
@@ -103,6 +103,7 @@ def initialize_sim(
             hoomd.filter.All(), hoomd.filter.Tags(head_tail_indices)
     )
     method = hoomd.md.methods.NVT(kT=kT, tau=tau_kT, filter=integrate_group)
+    method = hoomd.md.methods.Langevin(filter=integrate_group, kT=kT, default_
     integrator.methods.append(method)
     integrator.forces = list(forces)
     sim.operations.add(integrator)
