@@ -55,6 +55,11 @@ def initial_run_done(job):
 
 
 @KG_PPA.label
+def initial_ppa_run_done(job):
+    return job.doc.ppa_runs >= 1
+
+
+@KG_PPA.label
 def equilibrated(job):
     return job.doc.equilibrated
 
@@ -241,6 +246,77 @@ def run_longer(job):
         sim.save_restart_gsd(job.fn("restart.gsd"))
         job.doc.runs += 1
         print("Simulation finished.")
+
+
+@KG_PPA.pre(equilibrated)
+@KG_PPA.post(first_ppa_run_done)
+@KG_PPA.operation(
+        directives={"ngpu": 1, "executable": "python -u"},
+        name="run-ppa"
+)
+def run_ppa(job):
+    import pickle
+    import flowermd
+    from flowermd.base.simulation import Simulation
+    import gsd.hoomd
+    import entangled as ent
+    with job:
+        print("------------------------------------")
+        print("JOB ID NUMBER:")
+        print(job.id)
+        print("------------------------------------")
+        # Modify the starting snapshot
+        ppa_snap, head_tail_indices = ent.initialize_frame(
+                gsd_file=job.fn("restart.gsd"), frame_index=0
+        )
+        ppa_lj, ppa_bond = ent.initialize_forcefield(
+                frame=ppa_snap,
+                bond_r0=1.2,
+                bond_k=100,
+                pair_epsilon=job.sp.epsilon,
+                pair_sigma=job.sp.sigma,
+                pair_r_cut=1.12
+        )
+        gsd_path = job.fn(f"ppa_trajectory{job.doc.ppa_runs + 1}.gsd")
+        log_path = job.fn(f"ppa_log{job.doc.ppa_runs + 1}.txt")
+        # Create flowerMD simulation obj:
+        sim = Simulation(
+                initial_state=ppa_snap,
+                forcefield=[ppa_lj, ppa_bond],
+                reference_values=dict(),
+                dt=job.sp.dt / 2, # Start with smaller dt
+                gsd_write_freq=job.sp.gsd_write_freq,
+                gsd_file_name=gsd_path,
+                log_write_freq=job.sp.log_write_freq,
+                log_file_name=log_path,
+                seed=job.sp.sim_seed,
+        )
+        # Set integrate group to not integrate head and tail particles
+        integrate_group = hoomd.filter.SetDifference(
+                hoomd.filter.All(), hoomd.filter.Tags(head_tail_indices)
+        )
+        sim.integrate_group = integrate_group
+        sim.save_restart_gsd(job.fn("ppa_restart.gsd"))
+        sim.pickle_forcefield(job.fn("ppa_forcefield.pickle"))
+        sim.run_langevin(
+                n_steps=1000,
+                kT=0.001,
+                default_gamma=20,
+                default_gamma_r=(20, 20, 20)
+        )
+        sim.run_langevin(
+                n_steps=5e5,
+                kT=0.001,
+                default_gamma=job.sp.friction_coeff,
+                default_gamma_r=(
+                    job.sp.friction_coeff,
+                    job.sp.friction_coeff,
+                    job.sp.friction_coeff,
+                )
+        )
+        sim.save_restart_gsd(job.fn("ppa_restart.gsd"))
+        job.doc.ppa_runs += 1
+        print("PPA simulation finished.")
 
 if __name__ == "__main__":
     KG_PPA(environment=Fry).main()
