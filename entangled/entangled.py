@@ -68,7 +68,7 @@ def initialize_forcefield(
         bond.params[btype] = dict(
                 k=bond_k,
                 r0=bond_r0,
-                delta=delta,
+                delta=bond_delta,
                 epsilon=0,
                 sigma=0
         )
