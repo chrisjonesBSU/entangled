@@ -242,7 +242,16 @@ def run_longer(job):
                 log_file_name=log_path,
                 seed=job.sp.sim_seed,
         )
-        sim.run_NVT(n_steps=1e7, kT=job.sp.kT, tau_kt=job.doc.tau_kT)
+        sim.run_langevin(
+                n_steps=1e7,
+                kT=job.sp.kT,
+                default_gamma=job.sp.friction_coeff,
+                default_gamma_r=(
+                    job.sp.friction_coeff,
+                    job.sp.friction_coeff,
+                    job.sp.friction_coeff,
+                )
+        )
         sim.save_restart_gsd(job.fn("restart.gsd"))
         job.doc.runs += 1
         print("Simulation finished.")

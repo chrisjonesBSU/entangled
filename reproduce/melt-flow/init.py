@@ -46,9 +46,9 @@ def get_parameters():
     parameters["dt"] = [0.012]
     parameters["friction_coeff"] = [0.5]
     parameters["kT"] = [1.0]
-    parameters["n_steps"] = [1e8]
-    parameters["shrink_kT"] = [6.0]
-    parameters["shrink_n_steps"] = [1e6]
+    parameters["n_steps"] = [3e7]
+    parameters["shrink_kT"] = [4.0]
+    parameters["shrink_n_steps"] = [5e6]
     parameters["shrink_period"] = [1]
     parameters["tau_kT"] = [100]
     parameters["gsd_write_freq"] = [1e5]
@@ -69,6 +69,7 @@ def main():
         job.doc.setdefault("chain_lengths", job.sp.MN[1])
         job.doc.setdefault("equilibrated", False)
         job.doc.setdefault("runs", 0)
+        job.doc.setdefault("ppa_runs", 0)
 
 
 if __name__ == "__main__":
