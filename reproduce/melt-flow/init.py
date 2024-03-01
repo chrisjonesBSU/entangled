@@ -24,17 +24,17 @@ def get_parameters():
     # System and model params:
     # MN is the combo of number of chains (M) and chain lengths (N)
     parameters["MN"] = [
-            (50, 50),
+            #(50, 50),
             #(500, 50),
-            (450, 50),
+            #(450, 50),
             #(500, 100),
-            (450, 100),
+            #(450, 100),
             #(250, 200),
-            (242, 200),
+            #(242, 200),
             (200, 350),
             #(500, 500),
-            (450, 500),
-            (200, 700),
+            #(450, 500),
+            #(200, 700),
     ]
     parameters["number_density"] = [0.85] # 1/sigma^3
     parameters["epsilon"] = [1.0]
@@ -53,7 +53,7 @@ def get_parameters():
     parameters["tau_kT"] = [100]
     parameters["gsd_write_freq"] = [1e5]
     parameters["log_write_freq"] = [1e4]
-    parameters["sim_seed"] = [42]
+    parameters["sim_seed"] = [42, 24, 23, 8, 10]
     return list(parameters.keys()), list(product(*parameters.values()))
 
 
